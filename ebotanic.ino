@@ -1,6 +1,7 @@
 #include <LiquidCrystal.h>         
 #include "DHT.h"
 
+#define LDR A0  // Analog pin connected to LDR sensor
 #define DHTPIN 7     // Digital pin connected to the DHT sensor
 #define DHTTYPE DHT11   // DHT 11
 
@@ -8,7 +9,7 @@ DHT dht(DHTPIN, DHTTYPE);
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2); //Digital pins to which you connect the LCD
 const int inPin = 0;                   // A0 is where you connect the sensor
 int loopIndex = 0;
-const int carouselCount = 3;
+const int carouselCount = 4;
 
 typedef String (*SensorFunction) ();
 
@@ -49,6 +50,19 @@ String getHumidity() {
   valueString += "%";
 }
 
+String getPhotoresistance() {
+  String valueString = "";
+
+  int photoresistance = analogRead(LDR);
+
+  if (isnan(photoresistance)) {
+    return valueString;
+  }
+
+  valueString = photoresistance;
+  valueString += " Ohms";
+}
+
 CarouselItem items[carouselCount] = {
   {
     .title = "Hello, I'm",
@@ -67,6 +81,12 @@ CarouselItem items[carouselCount] = {
     .delay = 2000,
     .valueFunction = getHumidity,
     .error = "Failed to read humidity",
+  },
+  {
+    .title = "Photoresistance",
+    .delay = 2000,
+    .valueFunction = getPhotoresistance,
+    .error = "Failed to read photoresistance",
   },
 };
 
@@ -87,6 +107,7 @@ void setup()
 
   lcd.begin(16,2);
   dht.begin();
+  pinMode(LDR, INPUT);
 }
 
 void loop()
